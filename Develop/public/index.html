@@ -43,5 +43,55 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <script src="index.js"></script>
+  <script>
+    const request = indexedDB.open("budgetDatabase", 1);
+
+    request.onupgradeneeded = ({ target }) => {
+        const db = target.result;
+
+        const budgetStore = db.createObjectStore("budgets", {
+          keyPath: "listID"
+        });
+
+        budgetStore.createIndex("budgetIndex", "budget");
+      };
+
+      request.onsuccess = event => {
+        console.log(request.result);
+
+        const db = request.result;
+            const transaction = db.transaction(["budgets"], "readwrite");
+            const budgetStore = transaction.objectStore("budgets");
+            const statusIndex = budgetStore.index("statusIndex");
+
+            budgetStore.add({
+                      listID: "1",
+                      status: "complete"
+                  });
+                  budgetStore.add({
+                      listID: "2",
+                      status: "in-progress"
+                  });
+                  budgetStore.add({
+                      listID: "3",
+                      status: "complete"
+                  });
+                  budgetStore.add({
+                      listID: "4",
+                      status: "backlog"
+                  });
+      };
+
+      const getRequest = budgetStore.get("1");
+            getRequest.onsuccess = () => {
+                console.log(getRequest.result);
+            };
+
+            // Return an item by index
+            const getRequestIdx = statusIndex.getAll("complete");
+            getRequestIdx.onsuccess = () => {
+                console.log(getRequestIdx.result);
+            };
+</script>
 </body>
 </html>
