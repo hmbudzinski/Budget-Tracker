@@ -60,11 +60,12 @@
         console.log(request.result);
 
         const db = request.result;
+        //second .then repeats these two lines in serviceworker.js fetch, then a store.clear
         const transaction = db.transaction(["budgets"], "readwrite");
         const budgetStore = transaction.objectStore("budgets");
-        const statusIndex = budgetStore.index("statusIndex");
+        // const statusIndex = budgetStore.index("budgetIndex");
 
-        budgetStore.add({ budgetIndex: "1", budget: "complete" });
+        // budgetStore.add({ listID: "1", budget: "Coffee" });
 
         const getCursorRequest = budgetStore.openCursor();
         getCursorRequest.onsuccess = e => {
@@ -79,11 +80,26 @@
       };
 
       // Return an item by index
-      const getRequest = budgetStore.get("1");
-            getRequest.onsuccess = () => {
-                console.log(getRequest.result);
+      const getRequest = budgetStore.getAll();
+            budgetStore.onsuccess = () => {
+              //call fetch function, if result length is greater than 0 they do a fetch post, in post do a stringify to the results
+                console.log(budgetStore.result);
             };
+</script>
 
+<script type="text/javascript">
+  (function() {
+    if("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js", {
+        scope: "/"
+      })
+        .then((res) => {
+          console.log(res);
+          console.log("Service Worker registered successfully.");
+        })
+        .catch(error => console.log("Service Worker registration failed:", error));
+    }
+  })();
 </script>
 </body>
 </html>
