@@ -43,51 +43,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <script src="index.js"></script>
-  <script>
-    const request = indexedDB.open("budgetDatabase", 1);
 
-    request.onupgradeneeded = ({ target }) => {
-        const db = target.result;
-
-        const budgetStore = db.createObjectStore("budgets", {
-          keyPath: "listID"
-        });
-
-        budgetStore.createIndex("budgetIndex", "budget");
-      };
-
-      request.onsuccess = event => {
-        console.log(request.result);
-
-        const db = request.result;
-        //second .then repeats these two lines in serviceworker.js fetch, then a store.clear
-        const transaction = db.transaction(["budgets"], "readwrite");
-        const budgetStore = transaction.objectStore("budgets");
-        // const statusIndex = budgetStore.index("budgetIndex");
-
-        // budgetStore.add({ listID: "1", budget: "Coffee" });
-
-        const getCursorRequest = budgetStore.openCursor();
-        getCursorRequest.onsuccess = e => {
-          const cursor = e.target.result;
-          if (cursor) {
-            console.log(cursor.value);
-            cursor.continue();
-          } else {
-            console.log("No documents left!");
-          }
-        };
-      };
-
-      // Return an item by index
-      const getRequest = budgetStore.getAll();
-            budgetStore.onsuccess = () => {
-              //call fetch function, if result length is greater than 0 they do a fetch post, in post do a stringify to the results
-                console.log(budgetStore.result);
-            };
-</script>
-
-<script type="text/javascript">
+<!-- <script type="text/javascript">
   (function() {
     if("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js", {
@@ -100,6 +57,6 @@
         .catch(error => console.log("Service Worker registration failed:", error));
     }
   })();
-</script>
+</script> -->
 </body>
 </html>
