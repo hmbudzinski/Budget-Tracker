@@ -5,12 +5,9 @@ const request = indexedDB.open("budgetDatabase", 1);
 request.onupgradeneeded = ({ target }) => {
     const db = target.result;
 
-    const budgetStore = db.createObjectStore("pending", {
+    db.createObjectStore("pending", {
       autoIncrement: true
     });
-
-    // budgetStore.createIndex("itemAmount", "itemAmount");
-    // budgetStore.createIndex("transactionName", "name");
   };
 
   request.onsuccess = event => {
@@ -32,19 +29,38 @@ request.onupgradeneeded = ({ target }) => {
         
         const budgetStore = transaction.objectStore("pending");
 
+        budgetStore.add(record);
+    }
+
+    function checkDatabase(){
+        const transaction = db.transaction(["pending"], "readwrite");
+        const budgetStore = transaction.objectStore("pending");
+
         const getAll = budgetStore.getAll();
 
-        getAll.onsuccess = () => {
-            //call fetch function, if result length is greater than 0 they do a fetch post, in post do a stringify to the results
-        console.log(getAllItems.result);
-        };
+        getAll.onsuccess = function() {
+            if (getAll.result.length > 0) {
+                fetch("/api/transaction/bulk", {
+                  method: "POST",
+                  body: JSON.stringify(getAll.result),
+                  headers: {
+                    Accept: "application/json, text/plain, */*",
+                    "Content-Type": "application/json"
+                  }
+                })
+                .then(response => response.json())
+                .then(() => {
+                  // if successful, open a transaction on your pending db
+                  const transaction = db.transaction(["pending"], "readwrite");
+          
+                  // access your pending object store
+                  const budgetStore = transaction.objectStore("pending");
+          
+                  // clear all items in your store
+                  budgetStore.clear();
+                });
+              }
+        }
     }
-    // //second .then repeats these two lines in serviceworker.js fetch, then a store.clear
-    // const transactionType = budgetStore.index("type");
-    // // const transactionName = budgetStore.index("name");
-    // // const transactionAmount = budgetStore.index("amount");
-
-
-    // budgetStore.add({ listID: "1", transactionType: "withdrawal", transactionName: "Beer", transactionAmount: "7"});
-    // budgetStore.add({ listID: "2", transactionType: "withdrawal", transactionName: "Coffee", transactionAmount: "5"});
-    // budgetStore.add({ listID: "3", transactionType: "withdrawal", transactionName: "Lunch", ,transactionAmount: "20"});
+    console.log("TEST 1");
+    window.addEventListener("online", checkDatabase);
