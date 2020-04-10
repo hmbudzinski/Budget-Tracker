@@ -50,13 +50,10 @@ request.onupgradeneeded = ({ target }) => {
                 })
                 .then(response => response.json())
                 .then(() => {
-                  // if successful, open a transaction on your pending db
                   const transaction = db.transaction(["pending"], "readwrite");
           
-                  // access your pending object store
                   const budgetStore = transaction.objectStore("pending");
           
-                  // clear all items in your store
                   budgetStore.clear();
                 });
               }

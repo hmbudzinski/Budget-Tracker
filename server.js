@@ -7,6 +7,10 @@ const PORT = 3000;
 
 const app = express();
 
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+mongoose.connect(MONGODB_URI); 
+
 app.use(logger("dev"));
 
 app.use(compression());
@@ -20,7 +24,6 @@ mongoose.connect("mongodb://localhost/budget", {
   useFindAndModify: false
 });
 
-// routes
 app.use(require("./routes/api.js"));
 
 app.listen(PORT, () => {
